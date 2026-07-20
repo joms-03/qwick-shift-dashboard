@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Shift Staffing Dashboard",
+  "schemaVersion": 1
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Business First 5 Shifts Dashboard · Qwick</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+  :root {
+    color-scheme: light;
+    /* Qwick brand tokens, lifted from bohtrainingwalnutroom.vercel.app */
+    --bg: #FFF9F3;
+    --card: #ffffff;
+    --border: #E5E5E5;
+    --text: #101117;
+    --muted: #4A4A4A;
+    --accent: #209F5B;
+    --accent-hover: #23CB6E;
+    --accent-deep: #0E5C36;
+    --red: #FB4F2F;
+    --red-bg: #FDE7E2;
+    --orange: #F5A623;
+    --orange-bg: #FDF1DC;
+    --green: #209F5B;
+    --green-bg: #E1F3EA;
+    --green-dark: #0E5C36;
+    --blue: #5295FF;
+    --blue-bg: #E8F0FF;
+    --gray-bg: #F2F2F2;
+    --cream-chip: #FFF9F3;
+    --font-body: 'Work Sans', system-ui, sans-serif;
+    --font-display: 'Work Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-marker: 'Permanent Marker', cursive;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 24px 28px 60px;
+  }
+  header.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .brand-mark {
+    font-family: var(--font-marker);
+    color: var(--accent);
+    font-size: 15px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin: 0 0 4px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .snapshot-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    white-space: nowrap;
+  }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .kpi-card.danger .kpi-value { color: var(--red); }
+  .kpi-card.warn .kpi-value { color: var(--orange); }
+  .kpi-card.good .kpi-value { color: var(--green); }
+
+  .alert-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--orange-bg);
+    border: 1px solid #F3D28C;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .alert-banner.show { display: flex; }
+  .alert-banner .msg {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--orange);
+    font-weight: 600;
+  }
+  .alert-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 0 rgba(245,166,35,.5);
+    animation: pulse 1.8s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(245,166,35,.45); }
+    70% { box-shadow: 0 0 0 8px rgba(245,166,35,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+  }
+  .alert-banner a.jump {
+    font-size: 12.5px;
+    color: var(--orange);
+    text-decoration: underline;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .kpi-card.flag {
+    border-color: #F3D28C;
+  }
+  .kpi-card.flag .kpi-value { color: var(--orange); }
+  .badge-new {
+    display: inline-block;
+    font-family: var(--font-mono);
+    background: var(--orange-bg);
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-left: 7px;
+    vertical-align: middle;
+  }
+  .urgent-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    background: var(--red-bg);
+    color: var(--red);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+  }
+
+  details.panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+  }
+  summary.panel-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary.panel-summary::-webkit-details-marker { display: none; }
+  summary.panel-summary::marker { content: ""; }
+  .toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--green-bg);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  summary.panel-summary:hover .toggle-btn {
+    border-color: var(--accent);
+  }
+  .chevron {
+    font-size: 12px;
+    color: var(--accent);
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }
+  details[open] > summary.panel-summary .chevron { transform: rotate(180deg); }
+  details.panel:not([open]) { padding-bottom: 20px; }
+  .panel-body {
+    margin-top: 14px;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .panel-head h2, summary.panel-summary h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    margin: 0;
+  }
+  .panel-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .search-box {
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    width: 240px;
+    background: #fff;
+  }
+  .filter-select {
+    padding: 7px 30px 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%234a4a4a'><path d='M5.25 7.5l4.75 5 4.75-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+  }
+  .filter-select:hover { border-color: var(--accent); }
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    background: var(--card);
+  }
+  th.sortable:hover { color: var(--text); }
+  th .arrow { font-size: 10px; margin-left: 3px; opacity: .5; }
+  tr:hover td { background: #FDF8F1; }
+  .table-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .badge.CONFIRMED { background: var(--blue-bg); color: var(--blue); }
+  .badge.POSTED { background: var(--gray-bg); color: var(--muted); }
+  .badge.UNAPPROVED { background: var(--orange-bg); color: var(--orange); }
+  .badge.UNFILLED { background: var(--red-bg); color: var(--red); }
+  .badge.Verified { background: var(--blue-bg); color: var(--blue); }
+  .badge.Unverified { background: var(--gray-bg); color: var(--muted); }
+  .badge.Contacted { background: var(--green-bg); color: var(--green); }
+  .badge.Pending { background: var(--orange-bg); color: var(--orange); }
+  .num-red { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--red); font-weight: 700; }
+  .num-green { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--green); font-weight: 700; }
+  .num-zero { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+  .chart-wrap { position: relative; height: 340px; }
+  .chart-wrap.small { height: 300px; }
+  .mini-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .mini-kpi-card {
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .mini-kpi-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin-bottom: 4px;
+  }
+  .mini-kpi-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; }
+  .mini-kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .link-btn {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .link-btn:hover { text-decoration: underline; }
+  .inline-link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .inline-link:hover { text-decoration: underline; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 30px;
+  }
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .mini-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div>
+    <div class="brand-mark">Qwick</div>
+    <h1>Business First 5 Shifts Dashboard</h1>
+    <div class="subtitle">New-business onboarding &amp; shift fill tracking &middot; built from the <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1Ry1cozuvFYRYPv8dg449WaC2mDykAtScb1R1JLmGbjM/edit?gid=2006814828#gid=2006814828" target="_blank" rel="noopener">operations Google Sheet</a> &middot; Account/Ops Managers sourced from the <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1ZJHI_sz51unpEr6RB1WqrBMvH3BhkNFjjm8P1CHNCpk/edit?gid=934826613#gid=934826613" target="_blank" rel="noopener">markets &amp; managers sheet</a></div>
+  </div>
+  <div class="snapshot-tag" id="snapshotTag" data-snapshot-utc="2026-07-17T14:50:29Z">Snapshot &middot; July 17, 2026 14:50 UTC</div>
+</header>
+
+<div class="alert-banner" id="unapprovedBanner">
+  <div class="msg"><span class="alert-dot"></span><span id="unapprovedBannerText">Loading unapproved shift check&hellip;</span></div>
+  <a class="jump" href="#unapprovedPanel">Review now &darr;</a>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card danger">
+    <div class="kpi-label">Unfilled shifts &mdash; next 5 days</div>
+    <div class="kpi-value" id="kpiUnfilled5">9</div>
+    <div class="kpi-sub" id="kpiUnfilled5Sub">14 pros unfilled</div>
+  </div>
+  <div class="kpi-card warn">
+    <div class="kpi-label">Unfilled large shifts</div>
+    <div class="kpi-value" id="kpiHdGap">6</div>
+    <div class="kpi-sub" id="kpiHdGapSub">264 pros unfilled</div>
+  </div>
+  <div class="kpi-card good">
+    <div class="kpi-label">Filled slots (full pipeline)</div>
+    <div class="kpi-value" id="kpiFilled">89</div>
+    <div class="kpi-sub" id="kpiFilledSub">across 94 business-day rows</div>
+  </div>
+  <div class="kpi-card flag">
+    <div class="kpi-label">&#9888; Pending approval</div>
+    <div class="kpi-value" id="kpiUnapproved">7</div>
+    <div class="kpi-sub" id="kpiUnapprovedSub">across 3 businesses</div>
+  </div>
+  <div class="kpi-card flag">
+    <div class="kpi-label">&#9888; Pending outreach</div>
+    <div class="kpi-value" id="kpiPendingOutreach">0</div>
+    <div class="kpi-sub" id="kpiPendingOutreachSub">of 22 pros in the outreach queue</div>
+  </div>
+</div>
+
+<details class="panel" id="unapprovedPanel">
+  <summary class="panel-summary">
+    <div>
+      <h2>&#9888; Needs Approval</h2>
+      <div class="panel-desc">Every unapproved shift across the full pipeline, not just the next 5 days, sorted soonest first. Anything tagged "Next 5 days" needs sign-off immediately.</div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="table-scroll">
+      <table id="tblUnapproved">
+        <thead>
+          <tr>
+            <th data-key="0">Business</th>
+            <th data-key="1">Date</th>
+            <th data-key="2" style="text-align:right">Unapproved Count</th>
+            <th data-key="3">Acct. Manager</th>
+            <th data-key="4">Ops Manager</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<details class="panel">
+  <summary class="panel-summary">
+    <div>
+      <h2>Action Required &mdash; Unfilled Shifts (Next 5 Days)</h2>
+      <div class="panel-desc">Shifts happening within the next 5 days that still need pros confirmed. Treat these as top priority to avoid last-minute scrambles.</div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="filter-bar" style="margin-bottom:14px;">
+      <select class="filter-select" id="tbl1ManagerFilter"><option value="">All Account Managers</option></select>
+      <select class="filter-select" id="tbl1OpsManagerFilter"><option value="">All Ops Managers</option></select>
+      <select class="filter-select" id="tbl1StatusFilter"><option value="">All Statuses</option></select>
+      <select class="filter-select" id="tbl1AutoSelectFilter"><option value="">All Auto Select</option></select>
+    </div>
+    <div class="table-scroll">
+      <table id="tbl1">
+        <thead>
+          <tr>
+            <th data-key="0">Business</th>
+            <th data-key="1">Date</th>
+            <th data-key="2">Skill</th>
+            <th data-key="3" style="text-align:right">Req.</th>
+            <th data-key="4" style="text-align:right">Conf.</th>
+            <th data-key="5" style="text-align:right">Unfilled</th>
+            <th data-key="6">Status</th>
+            <th data-key="7">Auto Select</th>
+            <th data-key="8">Gig Type</th>
+            <th data-key="9">Acct. Manager</th>
+            <th data-key="10">Ops Manager</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<details class="panel">
+  <summary class="panel-summary">
+    <div>
+      <h2>Large Shifts (&gt;10 Pros Requested)</h2>
+      <div class="panel-desc">Large-headcount shifts. Red bars are understaffed (still need pros); green bars are overstaffed (more confirmed than requested).</div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="filter-bar" style="margin-bottom:14px;">
+      <select class="filter-select" id="tbl2ManagerFilter"><option value="">All Account Managers</option></select>
+      <select class="filter-select" id="tbl2OpsManagerFilter"><option value="">All Ops Managers</option></select>
+    </div>
+    <div class="grid-2">
+      <div class="table-scroll">
+        <table id="tbl2">
+          <thead>
+            <tr>
+              <th data-key="0">Business</th>
+              <th data-key="1">Date</th>
+              <th data-key="2">Skill</th>
+              <th data-key="3" style="text-align:right">Req.</th>
+              <th data-key="4" style="text-align:right">Conf.</th>
+              <th data-key="5" style="text-align:right">Gap</th>
+              <th data-key="6">Acct. Manager</th>
+              <th data-key="7">Ops Manager</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="chart-wrap small"><canvas id="hdChart"></canvas></div>
+    </div>
+  </div>
+</details>
+
+<details class="panel">
+  <summary class="panel-summary">
+    <div>
+      <h2>Full Shift Pipeline by Business &amp; Date</h2>
+      <div class="panel-desc">Every business/date row on the sheet, with fill status. Search, filter, or click a column header to sort.</div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="filter-bar" style="margin-bottom:16px;">
+      <select class="filter-select" id="tbl3ViewFilter">
+        <option value="">All Rows</option>
+        <option value="unfilled">Unfilled Only</option>
+        <option value="unapproved">Unapproved Only</option>
+      </select>
+      <select class="filter-select" id="tbl3MonthFilter"><option value="">All Months</option></select>
+      <select class="filter-select" id="tbl3AutoSelectFilter">
+        <option value="">All Auto Select</option>
+        <option value="on">Auto Select On</option>
+        <option value="off">Auto Select Off</option>
+      </select>
+      <input class="search-box" id="searchBox" placeholder="Search business name...">
+    </div>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="chart-wrap small"><canvas id="topUnfilledChart"></canvas></div>
+      <div class="chart-wrap small"><canvas id="statusMixChart"></canvas></div>
+    </div>
+    <div class="table-scroll" style="max-height:480px;">
+      <table id="tbl3">
+        <thead>
+          <tr>
+            <th data-key="0">Date</th>
+            <th data-key="1">Business</th>
+            <th data-key="2" style="text-align:right">Unfilled</th>
+            <th data-key="3" style="text-align:right">Filled</th>
+            <th data-key="4" style="text-align:right">Unapproved</th>
+            <th data-key="5" style="text-align:right">Auto Select</th>
+            <th data-key="6" style="text-align:right">Private Offer</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<details class="panel">
+  <summary class="panel-summary">
+    <div>
+      <h2>Outreach Queue &mdash; Business First 5</h2>
+      <div class="panel-desc">Pros in the upcoming-shift outreach window. "Outreach" reflects whether an agent has actually logged a note &mdash; not the sheet's own status field, which lags behind real activity. <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1pgA0imF5zQHd7iQ6K8GOUZK2eU4Q6KEhSQJkFpIz9C0/edit?gid=11145450#gid=11145450" target="_blank" rel="noopener">View source sheet &#8599;</a></div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="mini-kpi-row">
+      <div class="mini-kpi-card">
+        <div class="mini-kpi-label">In outreach queue</div>
+        <div class="mini-kpi-value" id="kpiOutreachQueue">&mdash;</div>
+        <div class="mini-kpi-sub">pros tied to upcoming shifts</div>
+      </div>
+      <div class="mini-kpi-card">
+        <div class="mini-kpi-label">Outreached</div>
+        <div class="mini-kpi-value" id="kpiOutreached">&mdash;</div>
+        <div class="mini-kpi-sub" id="kpiOutreachedSub">have a logged note</div>
+      </div>
+      <div class="mini-kpi-card">
+        <div class="mini-kpi-label">Not yet outreached</div>
+        <div class="mini-kpi-value" id="kpiNotOutreached">&mdash;</div>
+        <div class="mini-kpi-sub">no note logged yet</div>
+      </div>
+      <div class="mini-kpi-card">
+        <div class="mini-kpi-label">Top agent (all-time)</div>
+        <div class="mini-kpi-value" id="kpiTopAgent">&mdash;</div>
+        <div class="mini-kpi-sub" id="kpiTopAgentSub">notes logged</div>
+      </div>
+    </div>
+    <div class="filter-bar" style="margin-bottom:14px;">
+      <select class="filter-select" id="outreachMarketFilter"><option value="">All Markets</option></select>
+      <select class="filter-select" id="outreachAgentFilter"><option value="">All Agents</option></select>
+      <select class="filter-select" id="outreachStatusFilter">
+        <option value="">All Pros</option>
+        <option value="Contacted">Contacted</option>
+        <option value="Pending">Pending</option>
+      </select>
+    </div>
+    <div class="table-scroll" style="max-height:480px;">
+      <table id="tblOutreach">
+        <thead>
+          <tr>
+            <th data-key="0">Pro</th>
+            <th data-key="1">Location</th>
+            <th data-key="2">Market</th>
+            <th data-key="3">Skill</th>
+            <th data-key="4" style="text-align:right">Hrs to Start</th>
+            <th data-key="5">Shift Start</th>
+            <th data-key="6">Verified</th>
+            <th>Outreach</th>
+            <th data-key="7">Notes</th>
+            <th data-key="8">Agent</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<details class="panel">
+  <summary class="panel-summary">
+    <div>
+      <h2>Top Agents &mdash; All-Time Outreach</h2>
+      <div class="panel-desc">Total notes logged per agent across the full outreach history (not just the current queue window). <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1pgA0imF5zQHd7iQ6K8GOUZK2eU4Q6KEhSQJkFpIz9C0/edit?gid=738247926#gid=738247926" target="_blank" rel="noopener">View source sheet &#8599;</a></div>
+    </div>
+    <span class="toggle-btn">
+      <span class="toggle-text">Show less</span>
+      <span class="chevron">&#9662;</span>
+    </span>
+  </summary>
+  <div class="panel-body">
+    <div class="grid-2">
+      <div class="table-scroll">
+        <table id="tblAgents">
+          <thead>
+            <tr>
+              <th data-key="0">Agent</th>
+              <th data-key="1" style="text-align:right">Notes Logged</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="chart-wrap small"><canvas id="agentsChart"></canvas></div>
+    </div>
+  </div>
+</details>
+
+<footer>
+  Static snapshot &mdash; ask Claude to refresh this dashboard whenever the sheet updates.
+</footer>
+
+<script>
+const SEC1 = [["Fever - Candlelight @ Ritz Carlton Marina Del Rey", "2026-07-17 15:30:00", "Assistant Team Lead", "1", "0", "1", "POSTED", "Auto Select Off", "PRIVATE_DIRECT_OFFER", "Evan Russell", "Justin Friend"], ["Fever - SSI, An Idiot's Guide to Wine @ The Charleston", "2026-07-18 14:00:00", "Event Lead", "1", "0", "1", "POSTED", "Auto Select Off", "MARKETPLACE", "Lucas Olejnicak", "Justin Friend"], ["Fever - SSI, An Idiot's Guide to Wine @ The Charleston", "2026-07-18 15:30:00", "Beer & Wine Bartender", "2", "0", "2", "CONFIRMED", "Auto Select Off", "MARKETPLACE", "Lucas Olejnicak", "Justin Friend"], ["Fever - Candlelight @ The Celebrity Showroom", "2026-07-19 15:00:00", "Event Lead", "1", "0", "1", "CONFIRMED", "Auto Select Off", "MARKETPLACE", "Not Found", "Not Found"], ["Fever - Candlelight @ The Celebrity Showroom", "2026-07-19 15:00:00", "Assistant Team Lead", "1", "0", "1", "CONFIRMED", "Auto Select Off", "MARKETPLACE", "Not Found", "Not Found"], ["Fever - Candlelight @ The Celebrity Showroom", "2026-07-19 15:00:00", "Event Staff", "6", "1", "5", "UNFILLED", "Auto Select On", "MARKETPLACE", "Not Found", "Not Found"], ["Aleras Table", "2026-07-20 09:30:00", "Food Service Worker", "1", "0", "1", "CONFIRMED", "Auto Select On", "MARKETPLACE", "Jaclyn Dight", "Kat Tatkin"]];
+const SEC2 = [["Fever - DroneArt @ Suburu Field", "2026-07-17 18:15", "Event Staff", "30", "36", "-6", "Jaclyn Dight", "Kat Tatkin"], ["Levy - Baird Convention Center", "2026-07-22 13:00", "Event Help", "100", "25", "75", "Marlon Harris", "Caroline Roberts"], ["University of Michigan", "2026-07-24 12:00", "Event Help", "50", "38", "12", "Marlon Harris", "Caroline Roberts"], ["Levy - Baird Convention Center", "2026-07-24 13:00", "Event Help", "100", "22", "78", "Marlon Harris", "Caroline Roberts"], ["Aramark Facilities - Paycor Stadium", "2026-07-24 23:00", "General Cleaning", "25", "32", "-7", "Jaclyn Dight", "Kat Tatkin"], ["Stadium People - Forefront Field", "2026-07-25 12:00", "General Laborer", "40", "50", "-10", "Lucas Olejnicak", "Kat Tatkin"], ["University of Michigan", "2026-07-25 12:00", "Event Help", "50", "35", "15", "Marlon Harris", "Caroline Roberts"], ["Levy - Baird Convention Center", "2026-07-25 13:00", "Event Help", "100", "28", "72", "Marlon Harris", "Caroline Roberts"], ["Aramark Facilities - Paycor Stadium", "2026-07-25 23:00", "General Cleaning", "25", "32", "-7", "Jaclyn Dight", "Kat Tatkin"], ["Sanofi Pasteur", "2026-08-13 09:00", "Banquet Server", "12", "0", "12", "Jaclyn Dight", "Kat Tatkin"]];
+const SEC3 = [["2026-07-16", "DW Presents Inkarceration Music Festival", "0", "1", "0", "1", "0"], ["2026-07-16", "Eatie’s", "0", "1", "0", "1", "0"], ["2026-07-16", "Feeding Tampa Bay Causeway Center - Events", "0", "2", "0", "2", "2"], ["2026-07-16", "Fever - Candlelight @ El Paso Extra Space Storage", "0", "4", "0", "0", "4"], ["2026-07-16", "Toyota Financial Center - Infuse Hospitality", "0", "1", "0", "1", "0"], ["2026-07-17", "Fever - Candlelight @ Indianapolis Scotish Rite", "0", "2", "0", "0", "0"], ["2026-07-17", "Fever - Candlelight @ Ritz Carlton Marina Del Rey", "0", "1", "0", "0", "2"], ["2026-07-17", "Fever - DroneArt @ Suburu Field", "0", "3", "0", "2", "0"], ["2026-07-17", "IKEA New Haven", "0", "1", "0", "1", "0"], ["2026-07-17", "The Little Shop of Horticulture", "0", "1", "0", "1", "0"], ["2026-07-18", "Aramark - St Johnland Assisted Living", "0", "1", "0", "1", "0"], ["2026-07-18", "Feld Motorsports - MJAM S2 - Spectrum Center", "0", "1", "0", "1", "0"], ["2026-07-18", "Fever - SSI, An Idiot's Guide to Wine @ The Charleston", "0", "1", "0", "0", "0"], ["2026-07-19", "Feld Motorsports - MJAM S2 - Spectrum Center", "0", "1", "0", "1", "0"], ["2026-07-19", "Fever - Candlelight @ The Celebrity Showroom", "1", "2", "0", "1", "0"], ["2026-07-19", "WM Events - Atlanta", "0", "2", "0", "2", "0"], ["2026-07-20", "Aleras Table", "0", "1", "0", "1", "0"], ["2026-07-21", "Feeding Tampa Bay Causeway Center - Events", "0", "1", "0", "1", "1"], ["2026-07-21", "IKEA New Haven", "0", "1", "0", "1", "0"], ["2026-07-22", "Feeding Tampa Bay Causeway Center - Events", "0", "0", "0", "1", "1"], ["2026-07-22", "IKEA New Haven", "0", "1", "0", "1", "0"], ["2026-07-22", "Levy - Baird Convention Center", "1", "0", "0", "1", "0"], ["2026-07-23", "IKEA New Haven", "0", "1", "0", "1", "0"], ["2026-07-23", "Ringling Bros. (RB-148) - Mortgage Matchup Center", "0", "1", "0", "1", "0"], ["2026-07-24", "Aramark Facilities - Paycor Stadium", "0", "1", "0", "1", "0"], ["2026-07-24", "Fever - Candlelight @ The Vibiana", "0", "1", "0", "0", "0"], ["2026-07-24", "Fever - SSI, An Idiot's Guide to Wine @ The Box MKE", "0", "2", "0", "0", "0"], ["2026-07-24", "Fever - SSI, An Idiot's Guide to Wine @ The Center at 2300", "0", "1", "0", "1", "0"], ["2026-07-24", "Fever - SSI, We Call It @ Jazz - The Cleveland Art Museum - Gartner Auditorium", "0", "3", "0", "0", "2"], ["2026-07-24", "IKEA New Haven", "0", "1", "0", "1", "0"], ["2026-07-24", "Levy - Baird Convention Center", "1", "0", "0", "1", "0"], ["2026-07-24", "Ringling Bros. (RB-148) - Mortgage Matchup Center", "0", "1", "0", "1", "0"], ["2026-07-24", "University of Michigan", "1", "0", "0", "1", "0"], ["2026-07-25", "Aramark Facilities - Paycor Stadium", "0", "1", "0", "1", "0"], ["2026-07-25", "Feld Motorsports - MJAM S2 - Pensacola Bay Center", "1", "0", "0", "1", "0"], ["2026-07-25", "Fever - Candlelight @ The Madison Center for the Arts", "1", "2", "0", "0", "2"], ["2026-07-25", "Fever - Candlelight @ Wealthy Theatre", "0", "0", "0", "0", "0"], ["2026-07-25", "Fever - Pilots @ The Palmer House - Honroe Room", "0", "0", "0", "0", "0"], ["2026-07-25", "Fever - SSI, An Idiot's Guide to Wine @ The Barrel Room", "0", "2", "0", "1", "1"], ["2026-07-25", "Fever - SSI, An Idiot's Guide to Wine @ The Chop Shop", "0", "2", "0", "0", "0"], ["2026-07-25", "Fever - SSI, We Call It @ Ballet - Hendrick's Live!", "0", "3", "0", "0", "0"], ["2026-07-25", "Fever - SSI, We Call It @ Jazz - Edison's", "0", "1", "0", "0", "0"], ["2026-07-25", "Levy - Baird Convention Center", "1", "0", "0", "1", "0"], ["2026-07-25", "Ringling Bros. (RB-148) - Mortgage Matchup Center", "0", "1", "0", "1", "0"], ["2026-07-25", "Stadium People - Forefront Field", "1", "0", "0", "1", "0"], ["2026-07-25", "University of Michigan", "1", "0", "0", "1", "0"], ["2026-07-26", "Feld Motorsports - MJAM S2 - Pensacola Bay Center", "1", "0", "0", "1", "0"], ["2026-07-26", "Ringling Bros. (RB-148) - Mortgage Matchup Center", "0", "1", "0", "1", "0"], ["2026-07-29", "Daisy's Fish Shack", "0", "3", "0", "3", "0"], ["2026-07-30", "Daisy's Fish Shack", "0", "2", "0", "2", "0"], ["2026-07-31", "Fever - SSI, The Jury Experience @ Nesholm Family Lecture Hall at McCaw Hall", "1", "3", "0", "0", "0"], ["2026-08-01", "CONESTEE PARK", "0", "1", "0", "1", "0"], ["2026-08-01", "Fever - SSI, An Idiot's Guide to Wine @ Palladian Arthouse", "0", "2", "0", "2", "0"], ["2026-08-01", "Joe farmer rec center", "0", "1", "0", "1", "0"], ["2026-08-07", "Fever - SSI, An Idiot's Guide to Wine @ The Local Drive", "0", "0", "0", "0", "0"], ["2026-08-08", "Fever - Candlelight @ African American Performing Arts Center", "0", "0", "0", "0", "2"], ["2026-08-08", "Verde at Cincinnati Open", "0", "2", "0", "0", "0"], ["2026-08-09", "Verde at Cincinnati Open", "0", "2", "0", "0", "0"], ["2026-08-10", "Verde at Cincinnati Open", "0", "1", "0", "0", "0"], ["2026-08-11", "Levy - Cincinnati Open", "2", "0", "0", "2", "0"], ["2026-08-12", "Levy - Cincinnati Open", "0", "0", "0", "0", "0"], ["2026-08-13", "Fever - Candlelight @ El Paso Extra Space Storage", "0", "0", "0", "0", "1"], ["2026-08-13", "Sanofi Pasteur", "0", "0", "0", "1", "0"], ["2026-08-14", "Fever - SSI, We Call It @ Lincoln Theatre - Jazz", "0", "0", "0", "0", "0"], ["2026-08-15", "LocoMotive Live-K-POP SUPERSTARS @ The Louisville Palace", "0", "1", "0", "1", "1"], ["2026-08-16", "Fever - Candlelight @ Howard Theater", "1", "0", "0", "0", "0"], ["2026-08-21", "Fever - SSI, An Idiot's Guide to Wine @ Walker Studios", "0", "0", "0", "0", "0"], ["2026-08-22", "Fever - SSI, An Idiot's Guide to Wine @ Palladian Arthouse", "0", "0", "0", "1", "0"], ["2026-08-28", "Fever - SSI, An Idiot's Guide to Wine @ The Charleston", "0", "1", "0", "0", "0"], ["2026-09-05", "Sensational Sips", "0", "0", "0", "2", "0"], ["2026-09-11", "LocoMotive Live-K-POP SUPERSTARS @ The Met", "0", "1", "0", "1", "0"], ["2026-09-18", "Fever - SSI, An Idiot's Guide to Wine @ The Center at 2300", "0", "0", "0", "1", "0"], ["2026-09-20", "Fever, SSI - The Jury Experience @ Roulette Theater", "0", "2", "0", "0", "3"], ["2026-09-25", "Fever - SSI, An Idiot's Guide to Wine @ The Local Drive", "0", "0", "0", "0", "0"], ["2026-10-02", "Fever - SSI, An Idiot's Guide to Wine @ Walker Studios", "0", "0", "0", "0", "0"], ["2026-10-04", "Fever, SSI - The Jury Experience @ Pollak Theater", "1", "2", "0", "0", "2"], ["2026-10-09", "Fever - Candlelight @ Clubhouse on South Temple", "0", "0", "0", "0", "0"], ["2026-10-10", "Fever - Candlelight @ Clubhouse on South Temple", "0", "0", "0", "0", "0"], ["2026-10-11", "Fever, SSI - The Jury Experience @ The Warehouse at FTC", "1", "1", "0", "2", "1"], ["2026-10-18", "Fever - SSI, The Jury Experience @ The Space Westbury", "1", "2", "0", "0", "2"], ["2026-10-30", "Fever - SSI, An Idiot's Guide to Wine @ The Center at 2300", "0", "0", "0", "0", "0"], ["2026-11-07", "Fever, SSI - The Jury Experience @ Pollak Theater", "0", "2", "0", "0", "2"], ["2026-11-15", "Fever, SSI - The Jury Experience @ The Warehouse at FTC", "0", "0", "0", "1", "2"], ["2026-12-05", "Fever, SSI - The Jury Experience @ Roulette Theater", "0", "1", "0", "0", "2"], ["2026-12-06", "Fever - SSI, The Jury Experience @ The Space Westbury", "0", "2", "0", "0", "2"], ["2026-12-27", "LocoMotive Live - K-POP SUPERSTARS @ The Truth", "1", "0", "0", "1", "1"]];
+const OUTREACH_QUEUE = [["Alisha Collins", "Brick & Vine Restaurant", "Cleveland, OH", "Dishwasher", "4.35", "2026-07-17 15:00:00", "Verified", "No ans, Low Skill Shift, Skill Cert, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/29945/gigs/1605099/applicants"], ["James Adams", "Odori Japanese Steakhouse", "Myrtle Beach, SC", "Dishwasher", "5.35", "2026-07-17 16:00:00", "Verified", "Solid pro, Low Skill Shift, Skill Cert, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30297/gigs/1605295/applicants"], ["Grant Gavin", "Seanachai Whiskey & Cocktail Bar", "Charleston, SC", "Line Cook", "6.35", "2026-07-17 17:00:00", "Verified", "Solid pro, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/29964/gigs/1602743/applicants"], ["Ken DeGaetano", "Medley Club at Southshore Bay", "Tampa Bay/Sarasota, FL", "Restaurant Server", "6.35", "2026-07-17 17:00:00", "Verified", "Solid pro, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30161/gigs/1606681/applicants"], ["Samantha Valdez", "Medley Club at Southshore Bay", "Tampa Bay/Sarasota, FL", "Restaurant Server", "6.35", "2026-07-17 17:00:00", "Verified", "Solid pro, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30161/gigs/1606681/applicants"], ["Judy Guzman", "Orange Focus Inveatments", "Dallas, TX", "Banquet Server", "8.35", "2026-07-17 18:00:00", "Verified", "Solid pro, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30262/gigs/1605556/applicants"], ["Teschina X", "Orange Focus Inveatments", "Dallas, TX", "Banquet Server", "8.35", "2026-07-17 18:00:00", "Verified", "Solid pro, sent text - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30262/gigs/1605553/applicants"], ["Carolina Lozada Sabogal", "BNB Wings N Things - Water Lantern Festival San Jose", "San Jose, CA", "Concession Worker", "9.35", "2026-07-17 17:00:00", "Verified", "Solid pro, text sent - RJC", "Rhys", "https://biz.qwick.com/locations/30319/gigs/1606740/applicants"], ["Jamie Hagan", "Eurest - Burlington Stores Savannah", "Savannah, GA / Hilton Head, SC", "Dishwasher", "21.35", "2026-07-18 08:00:00", "Verified", "RJC - BF5 - Repeat shift.", "Rhys", "https://biz.qwick.com/locations/28259/gigs/1597076/applicants"], ["Cornelia Bonner", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "22.35", "2026-07-18 09:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601570/applicants"], ["Dominic Jones", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "22.35", "2026-07-18 09:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601570/applicants"], ["Eudis Ascencio", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "22.35", "2026-07-18 09:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601570/applicants"], ["Jolanda Chamberland", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "22.35", "2026-07-18 09:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601570/applicants"], ["Calvin Swain", "FOREVER RENTALS", "Tampa Bay/Sarasota, FL", "General Laborer", "24.35", "2026-07-18 11:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30217/gigs/1602419/applicants"], ["Jerry Patterson", "Aramark - St Johnland Assisted Living", "New York, NY-NJ", "Banquet Server", "24.85", "2026-07-18 11:30:00", "Verified", "Solid pro, text sent - MJC", "Mark Camillo", "https://biz.qwick.com/locations/30108/gigs/1596930/applicants"], ["Brian Shiflet", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "26.35", "2026-07-18 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601571/applicants"], ["Nayhesa or Ny Harris", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "26.35", "2026-07-18 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601571/applicants"], ["Benito Bonilla", "Brookhaven Country Club", "Dallas, TX", "Line Cook", "28.85", "2026-07-18 14:30:00", "Verified", "", "", "https://biz.qwick.com/locations/29333/gigs/1606433/applicants"], ["Brittany Wall", "Odori Japanese Steakhouse", "Myrtle Beach, SC", "Dishwasher", "29.35", "2026-07-18 16:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30297/gigs/1605296/applicants"], ["Karla McAllister", "Aloft Nashville West End", "Nashville, TN", "Bartender", "29.85", "2026-07-18 15:30:00", "Verified", "", "", "https://biz.qwick.com/locations/25402/gigs/1602794/applicants"], ["Amar Bolden", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Ericka Felton", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Jameka Mosby", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Lachelle Evans", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Mackenzie Caudle", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Reginald Colas", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Tiffinee Green", "OVG - CFG Bank Arena", "Baltimore, MD", "Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/26696/gigs/1606071/applicants"], ["Amelia Robertson", "OVG - Greenville Convention Center", "Greenville, SC", "Beer & Wine Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601573/applicants"], ["Cornelia Bonner", "OVG - Greenville Convention Center", "Greenville, SC", "Beer & Wine Bartender", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601573/applicants"], ["Jolanda Chamberland", "OVG - Greenville Convention Center", "Greenville, SC", "Food Service Worker", "30.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30109/gigs/1601572/applicants"], ["Chidubem Tony Agu", "Victoria Golf Course", "Los Angeles-Long Beach, CA", "General Laborer", "30.35", "2026-07-18 14:00:00", "Verified", "", "", "https://biz.qwick.com/locations/29721/gigs/1606663/applicants"], ["Laronda Wilson", "Orange Focus Inveatments", "Dallas, TX", "Banquet Server", "32.35", "2026-07-18 18:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30262/gigs/1605563/applicants"], ["Teschina X", "Orange Focus Inveatments", "Dallas, TX", "Banquet Server", "32.35", "2026-07-18 18:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30262/gigs/1605554/applicants"], ["Carolina Lozada Sabogal", "BNB Wings N Things - Water Lantern Festival San Jose", "San Jose, CA", "Food Assembler", "33.35", "2026-07-18 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30319/gigs/1606741/applicants"], ["Ashton Empoliti", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "43.35", "2026-07-19 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604882/applicants"], ["Erin Karr", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "43.35", "2026-07-19 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604882/applicants"], ["Shawan Gardner", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "43.35", "2026-07-19 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604882/applicants"], ["Tiyonna Jones-Ezell", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "43.35", "2026-07-19 06:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604882/applicants"], ["Casey Holmes", "Holbrook Sugar Hill - EL/IL", "Atlanta, GA", "Dishwasher", "45.35", "2026-07-19 08:00:00", "Verified", "Repeat Shift - MJC", "Mark Camillo", "https://biz.qwick.com/locations/12287/gigs/1591996/applicants"], ["Acim Cruz", "East Bay Meeting House", "Charleston, SC", "Server Assistant", "46.35", "2026-07-19 09:00:00", "Verified", "", "", "https://biz.qwick.com/locations/29361/gigs/1602865/applicants"], ["Reuadh Alsalman", "Strega", "Nashville, TN", "Line Cook", "49.85", "2026-07-19 11:30:00", "Verified", "", "", "https://biz.qwick.com/locations/29966/gigs/1605337/applicants"], ["Adam Silber", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591242/applicants"], ["Michael Jenkins", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591242/applicants"], ["Nakale Ayovunefe", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591242/applicants"], ["Quinton Torain", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591247/applicants"], ["Samira Bryant", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Verified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591247/applicants"], ["Tiari Raymond", "WM Events - Atlanta", "Atlanta, GA", "General Cleaning", "50.35", "2026-07-19 13:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/14806/gigs/1591242/applicants"], ["Jerome Brown", "Two Gunz BBQ", "Pittsburgh, PA", "Food Assembler", "51.35", "2026-07-19 14:00:00", "Verified", "", "", "https://biz.qwick.com/locations/29849/gigs/1603800/applicants"], ["Olivia Ellison", "Brookhaven Country Club", "Dallas, TX", "Line Cook", "52.85", "2026-07-19 14:30:00", "Verified", "", "", "https://biz.qwick.com/locations/29333/gigs/1606434/applicants"], ["Joshua Ward", "Odori Japanese Steakhouse", "Myrtle Beach, SC", "Dishwasher", "53.35", "2026-07-19 16:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30297/gigs/1605298/applicants"], ["Carolina Lozada Sabogal", "BNB Wings N Things - Water Lantern Festival San Jose", "San Jose, CA", "Food Assembler", "57.35", "2026-07-19 17:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30319/gigs/1606742/applicants"], ["Ashton Empoliti", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "67.35", "2026-07-20 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604883/applicants"], ["Aziz Lowe", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "67.35", "2026-07-20 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604883/applicants"], ["Erin Gates", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "67.35", "2026-07-20 06:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604883/applicants"], ["Erin Karr", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "67.35", "2026-07-20 06:00:00", "Verified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604883/applicants"], ["Tiyonna Jones-Ezell", "Derst Baking Company - Aramark Facilities", "Savannah, GA / Hilton Head, SC", "General Cleaning", "67.35", "2026-07-20 06:00:00", "Unverified", "", "", "https://biz.qwick.com/locations/30284/gigs/1604883/applicants"]];
+const OUTREACH_AGENTS = [["Rhys", 797], ["MOPS", 722], ["Melissa", 542], ["Marc Bryan", 220], ["Mark Camillo", 208], ["Gelo", 200], ["Audrey", 129], ["Cyrus", 12], ["Love Chand", 10], ["Mavis", 7], ["Joms", 6]];
+
+function fmtDate(s) {
+  const d = new Date(s.replace(' ', 'T'));
+  if (isNaN(d)) return s;
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: (s.includes(':00:00') || s.split(':').length>1) ? 'numeric' : undefined, minute: (s.split(':').length>1) ? '2-digit' : undefined, hour12: true, year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
+}
+
+// ---- Show the snapshot time in the viewer's own local timezone, not the fixed UTC it was refreshed in ----
+(function localizeSnapshot() {
+  const el = document.getElementById('snapshotTag');
+  const iso = el && el.dataset.snapshotUtc;
+  if (!iso) return;
+  const d = new Date(iso);
+  if (isNaN(d)) return;
+  const formatted = d.toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+  });
+  el.textContent = `Snapshot · ${formatted}`;
+})();
+
+// ---- Compute KPI cards dynamically from the data (so refreshing SEC1/SEC2/SEC3 alone keeps these accurate) ----
+(function computeKPIs() {
+  const totalUnfilled5 = SEC1.reduce((s, r) => s + parseInt(r[5], 10), 0);
+  const unfilledShiftCount5 = SEC1.filter(r => parseInt(r[5], 10) > 0).length;
+
+  const hdGap = SEC2.reduce((s, r) => { const g = parseInt(r[5], 10); return s + (g > 0 ? g : 0); }, 0);
+  const unfilledLargeShiftCount = SEC2.filter(r => parseInt(r[5], 10) > 0).length;
+  document.getElementById('kpiHdGap').textContent = unfilledLargeShiftCount;
+  document.getElementById('kpiHdGapSub').textContent = `${hdGap} pros unfilled`;
+
+  document.getElementById('kpiUnfilled5').textContent = unfilledShiftCount5;
+  document.getElementById('kpiUnfilled5Sub').textContent = `${totalUnfilled5} pros unfilled`;
+
+  const totalFilled = SEC3.reduce((s, r) => s + parseInt(r[3], 10), 0);
+  document.getElementById('kpiFilled').textContent = totalFilled;
+  document.getElementById('kpiFilledSub').textContent = `across ${SEC3.length} business-day rows`;
+})();
+
+function renderTable(bodyId, data, colTypes, opts) {
+  opts = opts || {};
+  const tbody = document.querySelector(bodyId + ' tbody');
+  tbody.innerHTML = '';
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach((cell, i) => {
+      const td = document.createElement('td');
+      const type = colTypes[i];
+      if (type === 'date') {
+        td.textContent = fmtDate(cell);
+      } else if (type === 'status') {
+        td.innerHTML = `<span class="badge ${cell}">${cell}</span>`;
+      } else if (type === 'num') {
+        td.style.textAlign = 'right';
+        const n = parseInt(cell, 10);
+        td.textContent = cell;
+        if (n > 0) td.classList.add('num-red');
+        else if (n < 0) td.classList.add('num-green');
+        else td.classList.add('num-zero');
+      } else {
+        td.textContent = cell;
+        if (opts.badgeCol === i) {
+          const badge = document.createElement('span');
+          badge.className = 'badge-new';
+          badge.textContent = opts.badgeLabel || 'NEW';
+          td.appendChild(badge);
+        }
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- Needs Approval: derive from SEC3 (unapproved > 0), enrich with manager from SEC1 ----
+function daysUntil(dateStr) {
+  const d = new Date(dateStr.replace(' ', 'T'));
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.floor((d - now) / (1000 * 60 * 60 * 24));
+}
+const managerByBiz = {};
+const opsManagerByBiz = {};
+SEC1.forEach(r => { managerByBiz[r[0]] = r[9]; opsManagerByBiz[r[0]] = r[10]; });
+
+const unapprovedList = SEC3
+  .filter(r => parseInt(r[4], 10) > 0)
+  .map(r => [r[1], r[0], r[4], managerByBiz[r[1]] || '—', opsManagerByBiz[r[1]] || '—', daysUntil(r[0])])
+  .sort((a, b) => a[5] - b[5]);
+
+function renderUnapproved() {
+  const tbody = document.querySelector('#tblUnapproved tbody');
+  tbody.innerHTML = '';
+  unapprovedList.forEach(row => {
+    const tr = document.createElement('tr');
+    const [biz, date, count, mgr, opsMgr, days] = row;
+    const urgent = days >= 0 && days <= 5;
+    tr.innerHTML = `
+      <td>${biz}</td>
+      <td>${fmtDate(date)}${urgent ? '<span class="urgent-badge">NEXT 5 DAYS</span>' : ''}</td>
+      <td style="text-align:right" class="num-red">${count}</td>
+      <td>${mgr}</td>
+      <td>${opsMgr}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+renderUnapproved();
+
+const bannerEl = document.getElementById('unapprovedBanner');
+const bannerText = document.getElementById('unapprovedBannerText');
+const kpiUnapprovedSub = document.getElementById('kpiUnapprovedSub');
+const totalUnapprovedCount = unapprovedList.reduce((s, r) => s + parseInt(r[2], 10), 0);
+document.getElementById('kpiUnapproved').textContent = totalUnapprovedCount;
+if (unapprovedList.length > 0) {
+  bannerEl.classList.add('show');
+  const totalCount = totalUnapprovedCount;
+  const urgentCount = unapprovedList.filter(r => r[5] >= 0 && r[5] <= 5).length;
+  bannerText.textContent = `${totalCount} unapproved shift${totalCount !== 1 ? 's' : ''} across ${unapprovedList.length} business${unapprovedList.length !== 1 ? 'es' : ''}` +
+    (urgentCount > 0 ? ` — ${urgentCount} due within 5 days` : '');
+  kpiUnapprovedSub.textContent = `across ${unapprovedList.length} business${unapprovedList.length !== 1 ? 'es' : ''}`;
+}
+
+function uniqueVals(arr, idx) {
+  return Array.from(new Set(arr.map(r => r[idx]))).sort();
+}
+function populateSelect(id, values) {
+  const sel = document.getElementById(id);
+  values.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+// ---- Table 1: Action Required (Manager / Status filters) ----
+const t1types = ['text','date','text','num','num','num','status','text','text','text','text'];
+const t1state = { data: SEC1.slice() };
+function applyTbl1Filters() {
+  const mgr = document.getElementById('tbl1ManagerFilter').value;
+  const opsMgr = document.getElementById('tbl1OpsManagerFilter').value;
+  const status = document.getElementById('tbl1StatusFilter').value;
+  const autoSelect = document.getElementById('tbl1AutoSelectFilter').value;
+  t1state.data = SEC1.filter(r => (!mgr || r[9] === mgr) && (!opsMgr || r[10] === opsMgr) && (!status || r[6] === status) && (!autoSelect || r[7] === autoSelect));
+  renderTable('#tbl1', t1state.data, t1types);
+}
+populateSelect('tbl1ManagerFilter', uniqueVals(SEC1, 9));
+populateSelect('tbl1OpsManagerFilter', uniqueVals(SEC1, 10));
+populateSelect('tbl1StatusFilter', uniqueVals(SEC1, 6));
+populateSelect('tbl1AutoSelectFilter', uniqueVals(SEC1, 7));
+document.getElementById('tbl1ManagerFilter').addEventListener('change', applyTbl1Filters);
+document.getElementById('tbl1OpsManagerFilter').addEventListener('change', applyTbl1Filters);
+document.getElementById('tbl1StatusFilter').addEventListener('change', applyTbl1Filters);
+document.getElementById('tbl1AutoSelectFilter').addEventListener('change', applyTbl1Filters);
+applyTbl1Filters();
+
+// ---- Table 2: Large Shifts (Manager filters) ----
+const t2types = ['text','date','text','num','num','num','text','text'];
+const t2state = { data: SEC2.slice() };
+function applyTbl2Filters() {
+  const mgr = document.getElementById('tbl2ManagerFilter').value;
+  const opsMgr = document.getElementById('tbl2OpsManagerFilter').value;
+  t2state.data = SEC2.filter(r => (!mgr || r[6] === mgr) && (!opsMgr || r[7] === opsMgr));
+  renderTable('#tbl2', t2state.data, t2types);
+}
+populateSelect('tbl2ManagerFilter', uniqueVals(SEC2, 6));
+populateSelect('tbl2OpsManagerFilter', uniqueVals(SEC2, 7));
+document.getElementById('tbl2ManagerFilter').addEventListener('change', applyTbl2Filters);
+document.getElementById('tbl2OpsManagerFilter').addEventListener('change', applyTbl2Filters);
+applyTbl2Filters();
+
+// ---- Table 3: Full pipeline (search + view + month filters) ----
+const t3types = ['date','text','num','num','num','num','num'];
+const t3state = { data: SEC3.slice() };
+function monthLabel(ym) {
+  const [y, m] = ym.split('-');
+  const d = new Date(parseInt(y,10), parseInt(m,10)-1, 1);
+  return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+}
+function applyTbl3Filters() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const view = document.getElementById('tbl3ViewFilter').value;
+  const month = document.getElementById('tbl3MonthFilter').value;
+  const autoSelect = document.getElementById('tbl3AutoSelectFilter').value;
+  t3state.data = SEC3.filter(r => {
+    if (q && !r[1].toLowerCase().includes(q)) return false;
+    if (view === 'unfilled' && parseInt(r[2],10) <= 0) return false;
+    if (view === 'unapproved' && parseInt(r[4],10) <= 0) return false;
+    if (month && !r[0].startsWith(month)) return false;
+    if (autoSelect === 'on' && parseInt(r[5],10) <= 0) return false;
+    if (autoSelect === 'off' && parseInt(r[5],10) > 0) return false;
+    return true;
+  });
+  renderTable('#tbl3', t3state.data, t3types);
+}
+const months = Array.from(new Set(SEC3.map(r => r[0].slice(0,7)))).sort();
+const monthSelect = document.getElementById('tbl3MonthFilter');
+months.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = m; opt.textContent = monthLabel(m);
+  monthSelect.appendChild(opt);
+});
+document.getElementById('searchBox').addEventListener('input', applyTbl3Filters);
+document.getElementById('tbl3ViewFilter').addEventListener('change', applyTbl3Filters);
+document.getElementById('tbl3MonthFilter').addEventListener('change', applyTbl3Filters);
+document.getElementById('tbl3AutoSelectFilter').addEventListener('change', applyTbl3Filters);
+applyTbl3Filters();
+
+// generic sort-on-click-header (sorts state.data in place, keeping filters applied)
+function attachSort(tableId, state, types, rerender) {
+  const table = document.getElementById(tableId);
+  let sortState = {};
+  table.querySelectorAll('th').forEach(th => {
+    if (th.dataset.key === undefined) return;
+    th.classList.add('sortable');
+    th.addEventListener('click', () => {
+      const key = parseInt(th.dataset.key, 10);
+      const asc = !(sortState[key] === 'asc');
+      sortState = { [key]: asc ? 'asc' : 'desc' };
+      const isNum = types[key] === 'num';
+      state.data.sort((a, b) => {
+        let va = a[key], vb = b[key];
+        if (isNum) { va = parseInt(va, 10); vb = parseInt(vb, 10); }
+        if (va < vb) return asc ? -1 : 1;
+        if (va > vb) return asc ? 1 : -1;
+        return 0;
+      });
+      rerender();
+    });
+  });
+}
+attachSort('tbl1', t1state, t1types, () => renderTable('#tbl1', t1state.data, t1types));
+attachSort('tbl2', t2state, t2types, () => renderTable('#tbl2', t2state.data, t2types));
+attachSort('tbl3', t3state, t3types, () => renderTable('#tbl3', t3state.data, t3types));
+attachSort('tblUnapproved', { data: unapprovedList }, ['text','text','num','text','text'], renderUnapproved);
+
+// ---- Collapsible panels: keep the "Show more/less" label in sync with open state ----
+document.querySelectorAll('details.panel').forEach(panel => {
+  const label = panel.querySelector('.toggle-text');
+  if (!label) return;
+  const sync = () => { label.textContent = panel.open ? 'Show less' : 'Show more'; };
+  sync();
+  panel.addEventListener('toggle', sync);
+});
+
+// ---- Chart: Large-shift pro gap ----
+const hdSorted = SEC2.slice().sort((a,b) => parseInt(b[5],10) - parseInt(a[5],10));
+new Chart(document.getElementById('hdChart'), {
+  type: 'bar',
+  data: {
+    labels: hdSorted.map(r => r[0].length > 22 ? r[0].slice(0,22)+'…' : r[0]),
+    datasets: [{
+      label: 'Gap (unfilled pros)',
+      data: hdSorted.map(r => parseInt(r[5],10)),
+      backgroundColor: hdSorted.map(r => parseInt(r[5],10) > 0 ? '#FB4F2F' : '#209F5B'),
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false }, title: { display: true, text: 'Gap by business (positive = understaffed)', font: {size: 12} } },
+    scales: { x: { grid: { color: '#E5E5E5' } }, y: { grid: { display: false } } }
+  }
+});
+
+// ---- Chart: Top unfilled businesses (full pipeline) ----
+const unfilledByBiz = {};
+SEC3.forEach(r => {
+  const biz = r[1], u = parseInt(r[2],10);
+  unfilledByBiz[biz] = (unfilledByBiz[biz]||0) + u;
+});
+const topUnfilled = Object.entries(unfilledByBiz).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
+new Chart(document.getElementById('topUnfilledChart'), {
+  type: 'bar',
+  data: {
+    labels: topUnfilled.map(([b]) => b.length > 26 ? b.slice(0,26)+'…' : b),
+    datasets: [{
+      label: 'Total unfilled slots',
+      data: topUnfilled.map(([,v]) => v),
+      backgroundColor: '#FB4F2F',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false }, title: { display: true, text: 'Top businesses by total unfilled slots', font: {size: 12} } },
+    scales: { x: { grid: { color: '#E5E5E5' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } }
+  }
+});
+
+// ---- Chart: status mix (filled / unfilled / unapproved) ----
+const totFilled = SEC3.reduce((s,r)=>s+parseInt(r[3],10),0);
+const totUnfilled = SEC3.reduce((s,r)=>s+parseInt(r[2],10),0);
+const totUnapproved = SEC3.reduce((s,r)=>s+parseInt(r[4],10),0);
+new Chart(document.getElementById('statusMixChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Filled', 'Unfilled', 'Pending approval'],
+    datasets: [{
+      data: [totFilled, totUnfilled, totUnapproved],
+      backgroundColor: ['#209F5B', '#FB4F2F', '#F5A623'],
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: {font:{size:11}} }, title: { display: true, text: 'Slot status across full pipeline', font: {size: 12} } }
+  }
+});
+
+// ---- Outreach Queue: columns are [pro, phone, location, market, skill, hoursToStart, shiftStart, verified, notes, agent, shiftUrl] ----
+// "Outreach" is derived from whether a note has actually been logged, since the sheet's own
+// outreach_status column lags behind real agent activity (rows sit at "Not outreached" long
+// after an agent has texted/called and logged a note).
+function renderOutreachTable(data) {
+  const tbody = document.querySelector('#tblOutreach tbody');
+  tbody.innerHTML = '';
+  data.forEach(row => {
+    const [pro, location, market, skill, hrs, start, verified, notes, agent, url] = row;
+    const contacted = notes.trim() !== '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${pro}</td>
+      <td>${location}</td>
+      <td>${market}</td>
+      <td>${skill}</td>
+      <td style="text-align:right">${parseFloat(hrs).toFixed(1)}</td>
+      <td>${fmtDate(start)}</td>
+      <td><span class="badge ${verified}">${verified}</span></td>
+      <td><span class="badge ${contacted ? 'Contacted' : 'Pending'}">${contacted ? 'Contacted' : 'Pending'}</span></td>
+      <td>${notes || '&mdash;'}</td>
+      <td>${agent || '&mdash;'}</td>
+      <td><a class="link-btn" href="${url}" target="_blank" rel="noopener">View &rarr;</a></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+(function computeOutreachKPIs() {
+  const total = OUTREACH_QUEUE.length;
+  const outreached = OUTREACH_QUEUE.filter(r => r[7].trim() !== '').length;
+  const notYet = total - outreached;
+  document.getElementById('kpiOutreachQueue').textContent = total;
+  document.getElementById('kpiOutreached').textContent = outreached;
+  document.getElementById('kpiOutreachedSub').textContent =
+    `${total ? Math.round(outreached / total * 100) : 0}% of queue has a note`;
+  document.getElementById('kpiNotOutreached').textContent = notYet;
+  document.getElementById('kpiPendingOutreach').textContent = notYet;
+  document.getElementById('kpiPendingOutreachSub').textContent = `of ${total} pros in the outreach queue`;
+  if (OUTREACH_AGENTS.length) {
+    const [topName, topCount] = OUTREACH_AGENTS[0];
+    document.getElementById('kpiTopAgent').textContent = topName;
+    document.getElementById('kpiTopAgentSub').textContent = `${topCount} notes logged`;
+  }
+})();
+
+const outreachTypes = ['text','text','text','text','num','text','text','text','text'];
+const outreachState = { data: OUTREACH_QUEUE.slice() };
+function applyOutreachFilters() {
+  const market = document.getElementById('outreachMarketFilter').value;
+  const agent = document.getElementById('outreachAgentFilter').value;
+  const status = document.getElementById('outreachStatusFilter').value;
+  outreachState.data = OUTREACH_QUEUE.filter(r => {
+    if (market && r[2] !== market) return false;
+    if (agent && r[8] !== agent) return false;
+    const contacted = r[7].trim() !== '';
+    if (status === 'Contacted' && !contacted) return false;
+    if (status === 'Pending' && contacted) return false;
+    return true;
+  });
+  renderOutreachTable(outreachState.data);
+}
+populateSelect('outreachMarketFilter', uniqueVals(OUTREACH_QUEUE, 2));
+populateSelect('outreachAgentFilter', uniqueVals(OUTREACH_QUEUE, 8).filter(Boolean));
+document.getElementById('outreachMarketFilter').addEventListener('change', applyOutreachFilters);
+document.getElementById('outreachAgentFilter').addEventListener('change', applyOutreachFilters);
+document.getElementById('outreachStatusFilter').addEventListener('change', applyOutreachFilters);
+applyOutreachFilters();
+attachSort('tblOutreach', outreachState, outreachTypes, () => renderOutreachTable(outreachState.data));
+
+// ---- Top Agents: all-time outreach volume from the full notes ledger ----
+function renderAgentsTable(data) {
+  const tbody = document.querySelector('#tblAgents tbody');
+  tbody.innerHTML = '';
+  data.forEach(([agent, count]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${agent}</td><td style="text-align:right">${count}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+const agentsState = { data: OUTREACH_AGENTS.slice() };
+renderAgentsTable(agentsState.data);
+attachSort('tblAgents', agentsState, ['text','num'], () => renderAgentsTable(agentsState.data));
+
+const agentsSorted = OUTREACH_AGENTS.slice().sort((a, b) => b[1] - a[1]);
+new Chart(document.getElementById('agentsChart'), {
+  type: 'bar',
+  data: {
+    labels: agentsSorted.map(([a]) => a),
+    datasets: [{
+      label: 'Notes logged (all-time)',
+      data: agentsSorted.map(([, c]) => c),
+      backgroundColor: '#209F5B',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false }, title: { display: true, text: 'Total outreach notes logged per agent (all-time)', font: {size: 12} } },
+    scales: { x: { grid: { color: '#E5E5E5' } }, y: { grid: { display: false } } }
+  }
+});
+</script>
+</body>
+</html>
