@@ -11,7 +11,7 @@
 <title>Business First 5 Shifts Dashboard · Qwick</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
   :root {
@@ -39,7 +39,6 @@
     --font-body: 'Work Sans', system-ui, sans-serif;
     --font-display: 'Work Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --font-marker: 'Permanent Marker', cursive;
   }
   * { box-sizing: border-box; }
   body {
@@ -58,11 +57,10 @@
     margin-bottom: 20px;
   }
   .brand-mark {
-    font-family: var(--font-marker);
-    color: var(--accent);
-    font-size: 15px;
-    line-height: 1;
-    margin-bottom: 6px;
+    height: 20px;
+    width: auto;
+    display: block;
+    margin-bottom: 8px;
   }
   h1 {
     font-family: var(--font-display);
@@ -399,7 +397,7 @@
 
 <header class="page-head">
   <div>
-    <div class="brand-mark">Qwick</div>
+    <img class="brand-mark" src="assets/qwick-logo.png" alt="Qwick">
     <h1>Business First 5 Shifts Dashboard</h1>
     <div class="subtitle">New-business onboarding &amp; shift fill tracking &middot; built from the <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1Ry1cozuvFYRYPv8dg449WaC2mDykAtScb1R1JLmGbjM/edit?gid=2006814828#gid=2006814828" target="_blank" rel="noopener">operations Google Sheet</a> &middot; Account/Ops Managers sourced from the <a class="inline-link" href="https://docs.google.com/spreadsheets/d/1ZJHI_sz51unpEr6RB1WqrBMvH3BhkNFjjm8P1CHNCpk/edit?gid=934826613#gid=934826613" target="_blank" rel="noopener">markets &amp; managers sheet</a></div>
   </div>
